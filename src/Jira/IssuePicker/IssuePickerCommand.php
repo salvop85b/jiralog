@@ -42,7 +42,8 @@ class IssuePickerCommand extends Command
             ->setDescription('Search for Issue')
             ->addArgument('query', InputArgument::REQUIRED, 'Query')
             ->addOption('jql', 'j', InputOption::VALUE_NONE, "Query is JQL" )
-            ->addOption('prefix', 'p', InputOption::VALUE_OPTIONAL, "ENV Auth Prefix" );
+            ->addOption('prefix', 'p', InputOption::VALUE_OPTIONAL, "ENV Auth Prefix" )
+            ->addOption('legacy', 'l', InputOption::VALUE_NONE, "Use legacy api");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -74,7 +75,17 @@ class IssuePickerCommand extends Command
 
         try {
 
-            $response = $api->execute($jql);
+            $command = !$input->getOption('legacy') ? 'execute' : 'executeLegacy';
+
+            $response = $api->$command($jql, [
+                'fields' => [
+                    'key',
+                    'status',
+                    'updated',
+                    'timespent',
+                    'summary',
+                ]
+            ]);
 
         } catch (RequestException $exception) {
             if($exception->hasResponse()) {
@@ -89,7 +100,6 @@ class IssuePickerCommand extends Command
         }
 
         $issues = array_map(function ($issue) {
-
             return [
                 'key' => $issue['key'],
                 'status' => $issue['fields']['status']['name'],

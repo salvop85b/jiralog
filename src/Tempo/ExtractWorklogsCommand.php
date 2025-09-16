@@ -162,9 +162,20 @@ class ExtractWorklogsCommand extends Command
         $issues = array_fill_keys($issues, null);
 
         try {
+            $foundIssues = $this->getJiraSearch()
+                ->execute(
+                    sprintf("id in (%s)", implode(',', array_keys($issues))),
+                    [
+                        'fields' => [
+                            'id',
+                            'key',
+                            'summary',
+                            'project'
+                        ]
+                    ]
+                );
 
-
-            foreach($this->getJiraSearch()->execute(sprintf("id in (%s)", implode(',', array_keys($issues))))['issues'] as $issue) {
+            foreach($foundIssues['issues'] as $issue) {
 
                 $issues[$issue['id']] = [
                     'id' => $issue['id'],

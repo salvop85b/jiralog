@@ -137,16 +137,16 @@ class ActivityReportTmitCommand extends Command
     protected function getIssuesByKey(array $keys): array
     {
         $query = sprintf("id in (%s)", implode(',', $keys));
-        $options = ['maxResults' => 100, 'startAt' => 0];
+        $options = ['maxResults' => 100, 'nextPageToken' => null];
         $results = [];
         do {
             echo sprintf("Recupero Issues...\n");
 
             $response = $this->getJiraSearch()->execute($query, $options);
             $results = array_merge($results, $response['issues']);
-            $options['startAt']+= $response['maxResults'];
+            $options['nextPageToken']= $response['nextPageToken'];
 
-        } while(count($results) < $response['total'] and $response['total'] > $options['startAt']);
+        } while($options['nextPageToken'] != null);
 
         return $results;
     }

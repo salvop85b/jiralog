@@ -57,7 +57,7 @@ class GetWorklogsByDayCommand extends Command
         $user = $input->getArgument("user");
         $query = sprintf("worklogDate = %s and worklogAuthor = %s", $day, $user ?? "currentUser()");
 
-        $issues = $issueApi->execute($query, ['fields' => ['summary']]);
+        $issues = $issueApi->executeLegacy($query, ['fields' => ['summary']]);
 
         if(empty($issues['issues'])) {
             die("Non risultano worklogs per la data e l'utente specificati!\n");
